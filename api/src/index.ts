@@ -1,6 +1,9 @@
-import express, { Request, Response } from "express";
+import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
+
+import healthRouter from "./routes/health";
+import jihaneRouter from "./routes/jihane";
 
 dotenv.config();
 
@@ -8,19 +11,11 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-app.get("/api/health", async (_req: Request, res: Response) => {
-  let ml = "unreachable";
-  try {
-    const r = await fetch("http://localhost:8000/health");
-    const data = await r.json();
-    ml = data.status;
-  } catch {
-    ml = "unreachable";
-  }
-  res.json({ api: "ok", ml });
-});
+// mount routers under /api
+app.use("/api", healthRouter);
+app.use("/api", jihaneRouter);
 
 const PORT = process.env.PORT || 4000;
 app.listen(PORT, () => {
-  console.log(`API running on http://localhost:${PORT}`);
+  console.log(`Server is running on port ${PORT}`);
 });
