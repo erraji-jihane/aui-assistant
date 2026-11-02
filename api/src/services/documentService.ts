@@ -1,13 +1,17 @@
 import { prisma } from "../lib/prisma";
 import { Prisma } from "@prisma/client";
 
-const CHUNK_SIZE = 500; // words per chunk
+const CHUNK_SIZE = 200; // words per chunk
+const CHUNK_OVERLAP = 40;
 
 export function chunkText(text: string): string[] {
   const words = text.split(/\s+/).filter(Boolean);
   const chunks: string[] = [];
-  for (let i = 0; i < words.length; i += CHUNK_SIZE) {
+  const step = CHUNK_SIZE - CHUNK_OVERLAP;
+  
+  for (let i = 0; i < words.length; i += step) {
     chunks.push(words.slice(i, i + CHUNK_SIZE).join(" "));
+    if (i + CHUNK_SIZE >= words.length) break;
   }
   return chunks.length > 0 ? chunks : [""];
 }
