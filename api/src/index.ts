@@ -5,6 +5,8 @@ import dotenv from "dotenv";
 import healthRouter from "./routes/health";
 import jihaneRouter from "./routes/jihane";
 import uploadRouter from "./routes/upload";
+import documentsRouter from "./routes/documents";
+
 
 dotenv.config();
 
@@ -15,6 +17,7 @@ app.use(express.json());
 app.use("/api", healthRouter);
 app.use("/api", jihaneRouter);
 app.use("/api", uploadRouter);
+app.use("/api", documentsRouter);
 
 const PORT = process.env.PORT || 4000;
 app.listen(PORT, () => {
