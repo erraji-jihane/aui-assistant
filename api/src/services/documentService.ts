@@ -21,7 +21,6 @@ export async function createDocumentWithChunks(params: {
   const chunks = chunkText(params.text);
 
   return await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
-    //                                                  ^^^^^^^^^^^^^^^^^^^^ add this
     const doc = await tx.document.create({
       data: {
         filename: params.filename,
