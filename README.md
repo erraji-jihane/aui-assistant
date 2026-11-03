@@ -8,14 +8,14 @@ Full product requirements: [docs/PRD.md](docs/PRD.md).
 
 ## Status
 
-This is a 4-week personal project, currently at the end of milestone 1.
+This is a 4-week personal project, in active development. Last updated November 2026.
 
 | | Milestone | State |
 |---|---|---|
 | M0 | Full stack runs locally (React, Express, FastAPI, Postgres) | ✅ Done |
 | M1 | Ingestion: upload → extract text → chunk → embed → store | ✅ Done |
 | — | Document inspector (chunk, token and embedding diagnostics) | ✅ Done |
-| M2 | Retrieval with FAISS + student chat UI | ⏳ Next |
+| M2 | Retrieval with FAISS + student chat UI | 🔨 In progress: FAISS set up, search endpoint next |
 | M3 | HNSW from scratch replaces FAISS | ⬜ To do |
 | M4 | Evaluation view (recall@k, MRR) | ⬜ To do |
 | M5 | HNSW vs FAISS benchmark | ⬜ To do |
