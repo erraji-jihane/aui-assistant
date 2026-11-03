@@ -6,6 +6,10 @@ AUI's official information (catalog, student handbook, policies, academic calend
 
 Full product requirements: [docs/PRD.md](docs/PRD.md).
 
+| Knowledge base | Document inspector |
+|---|---|
+| ![Knowledge base page with the student handbook uploaded](docs/screenshots/knowledge-base.png) | ![Inspector: pipeline results and each passage's token count against the model's 256-token limit](docs/screenshots/inspector.png) |
+
 ## Status
 
 Personal project in active development, started October 2026.
