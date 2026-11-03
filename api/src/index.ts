@@ -3,7 +3,6 @@ import cors from "cors";
 import dotenv from "dotenv";
 
 import healthRouter from "./routes/health";
-import jihaneRouter from "./routes/jihane";
 import uploadRouter from "./routes/upload";
 import documentsRouter from "./routes/documents";
 
@@ -15,7 +14,6 @@ app.use(cors());
 app.use(express.json());
 
 app.use("/api", healthRouter);
-app.use("/api", jihaneRouter);
 app.use("/api", uploadRouter);
 app.use("/api", documentsRouter);
 

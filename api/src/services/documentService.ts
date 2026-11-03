@@ -1,5 +1,6 @@
 import { prisma } from "../lib/prisma";
 import { Prisma } from "@prisma/client";
+import { embedTexts } from "../lib/embed";
 
 const CHUNK_SIZE = 200; // words per chunk
 const CHUNK_OVERLAP = 40;
@@ -23,7 +24,7 @@ export async function createDocumentWithChunks(params: {
   text: string;
 }) {
   const chunks = chunkText(params.text);
-
+  const embeddings = await embedTexts(chunks);   
   return await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
     const doc = await tx.document.create({
       data: {
@@ -39,7 +40,7 @@ export async function createDocumentWithChunks(params: {
         documentId: doc.id,
         content,
         chunkIndex: index,
-        embedding: [],
+        embedding: embeddings[index], 
       })),
     });
 
