@@ -19,9 +19,16 @@ Personal project in active development, started October 2026.
 | M3 | HNSW from scratch replaces FAISS | Planned |
 | M4 | Evaluation view (recall@k, MRR) | Planned |
 | M5 | HNSW vs FAISS benchmark | Planned |
-| M6 | Configuration study with Benjamini–Hochberg correction, deployment | Planned |
+| M6 | Configuration study with Benjamini–Hochberg correction | Planned |
+| M7 | Public deployment | To do (database ready) |
 
 **Not built yet:** retrieval, question answering with an LLM, the chat UI, HNSW, evaluation and deployment. Today the app ingests and inspects documents; it can't answer questions yet.
+
+**Deployment plan (to do):**
+- [x] PostgreSQL on Neon, migrations applied
+- [ ] ML service on a free host. Free tiers give about 512 MB of memory, which PyTorch exceeds, so the plan is to serve the same all-MiniLM-L6-v2 model through ONNX (`fastembed`) instead
+- [ ] API and web app on Vercel
+- [ ] Read-only mode for the public demo, so visitors can't upload or delete documents
 
 ## Architecture
 
