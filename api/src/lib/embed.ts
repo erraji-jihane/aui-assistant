@@ -1,4 +1,4 @@
-const ML_URL = process.env.ML_URL || "http://localhost:8000";
+export const ML_URL = process.env.ML_URL || "http://localhost:8000";
 
 // Sends texts to the ML service and returns one 384-number vector per text
 export async function embedTexts(texts: string[]): Promise<number[][]> {
