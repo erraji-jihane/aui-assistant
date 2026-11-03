@@ -20,6 +20,18 @@ class EmbedResponse(BaseModel):
 def health_check():
     return {"status": "healthy"}
 
+class TokenizeResponse(BaseModel):
+    counts: list[int]
+    max_tokens: int
+
+
+@app.post("/tokenize", response_model=TokenizeResponse)
+def tokenize(request: EmbedRequest):
+    # Counts include the [CLS] and [SEP] tokens the model adds, so they compare directly to max_tokens
+    ids = model.tokenizer(request.texts, add_special_tokens=True)["input_ids"]
+    return {"counts": [len(x) for x in ids], "max_tokens": model.max_seq_length}
+
+
 @app.post("/embed", response_model=EmbedResponse)
 def embed(request: EmbedRequest):
     vectors = model.encode(request.texts, normalize_embeddings=True)
