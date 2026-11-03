@@ -28,3 +28,25 @@ export async function deleteDocumentController(req: Request<{ id: string }>, res
     }
     return res.status(204).send();
 }
+
+export async function listDocumentsController(_req: Request, res: Response) {
+    const docs = await prisma.document.findMany({
+        orderBy: { uploadedAt: "desc" },
+        select: {
+            id: true,
+            filename: true,
+            sizeBytes: true,
+            uploadedAt: true,
+            _count: { select: { chunks: true } },
+        },
+    });
+    return res.json(
+        docs.map((d) => ({
+            id: d.id,
+            filename: d.filename,
+            sizeBytes: d.sizeBytes,
+            uploadedAt: d.uploadedAt,
+            chunkCount: d._count.chunks,
+        }))
+    );
+}
