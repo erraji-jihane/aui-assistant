@@ -1,5 +1,7 @@
 import { Request, Response } from "express";
 import { prisma } from "../lib/prisma";
+import { inspectDocument } from "../services/inspectService";
+import { reprocessDocument } from "../services/documentService";
 
 
 export async function getDocumentController(req: Request<{ id: string }>, res: Response) {
@@ -49,4 +51,25 @@ export async function listDocumentsController(_req: Request, res: Response) {
             chunkCount: d._count.chunks,
         }))
     );
+}
+
+export async function inspectDocumentController(req: Request<{ id: string }>, res: Response) {
+    const report = await inspectDocument(req.params.id);
+    if (!report) {
+        return res.status(404).json({ error: "Document not found" });
+    }
+    return res.json(report);
+}
+
+export async function reprocessDocumentController(req: Request<{ id: string }>, res: Response) {
+    try {
+        const result = await reprocessDocument(req.params.id);
+        if (!result) {
+            return res.status(404).json({ error: "Document not found" });
+        }
+        return res.json(result);
+    } catch (err) {
+        console.error("Reprocess failed:", err);
+        return res.status(500).json({ error: "Failed to re-process document" });
+    }
 }
