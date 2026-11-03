@@ -116,7 +116,7 @@ ML service: `POST /embed` and `POST /tokenize` both take `{ "texts": [...] }`. I
 api/    Express + Prisma API (routes → controllers → services)
 ml/     FastAPI embedding service
 web/    React + Vite + Tailwind frontend
-docs/   Product requirements (PRD.md) and learning notes
+docs/   Product requirements (PRD.md)
 ```
 
 ## Tech stack

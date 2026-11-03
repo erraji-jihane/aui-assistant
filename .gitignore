@@ -7,3 +7,6 @@ __pycache__/
 
 # Word lock files
 ~$*
+
+# Personal study notes (kept local)
+docs/LEARNING.md
