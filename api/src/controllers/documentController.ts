@@ -18,3 +18,13 @@ export async function getDocumentController(req: Request<{ id: string }>, res: R
         emptyChunks: doc.chunks.filter((c) => c.content.trim() === "").length,
     })
 }
+
+export async function deleteDocumentController(req: Request<{ id: string }>, res: Response) {
+    const result = await prisma.document.deleteMany({
+        where: { id: req.params.id },
+    });
+    if (result.count === 0) {
+        return res.status(404).json({ error: "Document not found" });
+    }
+    return res.status(204).send();
+}
