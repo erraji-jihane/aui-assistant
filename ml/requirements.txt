@@ -13,3 +13,6 @@ typing-inspection==0.4.4
 typing_extensions==4.16.0
 uvicorn==0.54.0
 sentence-transformers==5.6.0
+faiss-cpu==1.15.1
+numpy==2.5.4
+psycopg[binary]==3.3.6
