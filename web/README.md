@@ -4,6 +4,7 @@ The React frontend for AUI Assistant. See the [root README](../README.md) for th
 
 ## Pages
 
+- **Ask** (`#/ask`): write a question and get the closest passages. It also shows what happened to the text: token count, whether it was chunked, its vector, and how many passages were compared.
 - **Knowledge base** (`#/`): upload PDFs by drag-and-drop or by browsing, see every document with its number of passages, and delete documents.
 - **Inspector** (`#/inspect/<documentId>`): how one document was processed.
   - **Overview:** the pipeline results (file → words → passages → vectors → searchable) and a chart of each passage's token count against the model's 256-token limit.
@@ -23,8 +24,8 @@ The app talks to the API at `http://localhost:4000` by default. Set `VITE_API_UR
 
 ```
 src/
-  App.tsx             header and hash-based routing between the two pages
-  pages/              DocumentsPage, InspectorPage
+  App.tsx             header and hash-based routing between the pages
+  pages/              AskPage, DocumentsPage, InspectorPage
   components/         charts (vector strip, similarity charts, token chart), Pipeline
   lib/api.ts          API URL, response types, formatting helpers
 ```

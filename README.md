@@ -19,14 +19,14 @@ Personal project in active development, started October 2026.
 | M0 | Full stack runs locally (React, Express, FastAPI, Postgres) | Done |
 | M1 | Ingestion: upload → extract text → chunk → embed → store | Done |
 | | Document inspector (chunk, token and embedding diagnostics) | Done |
-| M2 | Retrieval with FAISS + student chat UI | In progress (FAISS set up, search endpoint next) |
+| M2 | Retrieval with FAISS + student chat UI | In progress (semantic search and the Ask page work; LLM answers and chat next) |
 | M3 | HNSW from scratch replaces FAISS | Planned |
 | M4 | Evaluation view (recall@k, MRR) | Planned |
 | M5 | HNSW vs FAISS benchmark | Planned |
 | M6 | Configuration study with Benjamini–Hochberg correction | Planned |
 | M7 | Public deployment | To do (database ready) |
 
-**Not built yet:** retrieval, question answering with an LLM, the chat UI, HNSW, evaluation and deployment. Today the app ingests and inspects documents; it can't answer questions yet.
+**Not built yet:** answers written by an LLM, the multi-turn chat, HNSW, evaluation and deployment. Today the app ingests documents and finds the passages closest to a question, but it doesn't write an answer yet, and retrieval quality hasn't been measured yet.
 
 **Deployment plan (to do):**
 - [x] PostgreSQL on Neon, migrations applied
@@ -46,11 +46,13 @@ Personal project in active development, started October 2026.
  ML service (Python, FastAPI, sentence-transformers)
     /embed      text → 384-dim normalized vectors (all-MiniLM-L6-v2)
     /tokenize   exact token counts from the model's own tokenizer
+    /search     k closest chunks for a vector (FAISS, exact search, in memory)
+    /reindex    rebuilds the index from Postgres after chunks change
 ```
 
 - **API server** (`api/`): handles uploads, PDF text extraction, chunking, and all database access through Prisma. It calls the ML service over HTTP.
-- **ML service** (`ml/`): a Python service, because the embedding model, FAISS and the HNSW index all live in the Python ecosystem. It loads the model once at startup and embeds a whole document's chunks in one batched request.
-- **Web** (`web/`): a knowledge-base page (upload, list, delete) and an inspector that shows how each document was processed.
+- **ML service** (`ml/`): a Python service, because the embedding model, FAISS and the HNSW index all live in the Python ecosystem. It loads the model once at startup, embeds a whole document's chunks in one batched request, and keeps the search index in memory, built from Postgres.
+- **Web** (`web/`): an Ask page (semantic search), a knowledge-base page (upload, list, delete), and an inspector that shows how each document was processed.
 
 ### Ingestion pipeline
 
@@ -59,6 +61,16 @@ Personal project in active development, started October 2026.
 3. **Chunk:** the text is split into 120-word passages, each repeating the last 20 words of the previous one, so no sentence is lost at a boundary.
 4. **Embed:** all passages go to the ML service in one request and come back as 384-number vectors, normalized so cosine similarity is a dot product.
 5. **Store:** the document and its passages are written in a single Postgres transaction, after the slow embedding call has finished.
+
+### Search pipeline
+
+1. **Count tokens:** the text is measured with the model's own tokenizer.
+2. **Chunk only if needed:** a question fits the model, so it's embedded whole. Text past the 256-token limit is split with the same chunker as documents, because the model would otherwise ignore everything after the limit.
+3. **Embed:** the same model as ingestion, because vectors from different models can't be compared.
+4. **Search:** FAISS compares each vector with every stored passage (exact search). When a long text was split, a passage keeps its best score across the parts.
+5. **Return:** Express looks up the winning chunk IDs in Postgres and adds the text and the document name.
+
+Postgres stays the source of truth and the FAISS index is a copy of it in memory, so every upload, re-process and delete triggers a rebuild.
 
 ## Engineering notes
 
@@ -94,6 +106,7 @@ cd ml
 python -m venv .venv
 source .venv/Scripts/activate   # Windows (Git Bash); on macOS/Linux: source .venv/bin/activate
 pip install -r requirements.txt
+cp .env.example .env            # then set DATABASE_URL, the same database as the API
 uvicorn main:app --reload --port 8000
 ```
 
@@ -105,13 +118,14 @@ npm install
 npm run dev
 ```
 
-Open http://localhost:5173 and upload a PDF. `GET http://localhost:4000/api/health` reports whether the API and the ML service are both up.
+Open http://localhost:5173, upload a PDF, then search it from the Ask page. `GET http://localhost:4000/api/health` reports whether the API and the ML service are both up.
 
 ## API
 
 | Method | Endpoint | What it does |
 |---|---|---|
 | `GET` | `/api/health` | Health of the API and the ML service |
+| `POST` | `/api/search` | Find the closest passages (JSON: `query`, optional `k`), and report how the text was processed |
 | `POST` | `/api/upload` | Upload a PDF or text file (form field `file`): extract, chunk, embed, store |
 | `GET` | `/api/documents` | List documents with their chunk counts |
 | `GET` | `/api/documents/:id` | Short summary of one document |
@@ -119,17 +133,17 @@ Open http://localhost:5173 and upload a PDF. `GET http://localhost:4000/api/heal
 | `POST` | `/api/documents/:id/reprocess` | Re-chunk and re-embed a document from its stored text |
 | `DELETE` | `/api/documents/:id` | Delete a document and, by cascade, its chunks |
 
-ML service: `POST /embed` and `POST /tokenize` both take `{ "texts": [...] }`. Interactive docs are at http://localhost:8000/docs.
+ML service: `POST /embed` and `POST /tokenize` take `{ "texts": [...] }`, `POST /search` takes `{ "vectors": [...], "k": 5 }`, and `POST /reindex` rebuilds the index. Interactive docs are at http://localhost:8000/docs.
 
 ## Project structure
 
 ```
 api/    Express + Prisma API (routes → controllers → services)
-ml/     FastAPI embedding service
+ml/     FastAPI embedding and search service
 web/    React + Vite + Tailwind frontend
 docs/   Product requirements (PRD.md)
 ```
 
 ## Tech stack
 
-TypeScript, React 19, Vite, Tailwind CSS · Node.js, Express 5, Prisma 6, multer, pdf-parse · PostgreSQL · Python, FastAPI, sentence-transformers (all-MiniLM-L6-v2). Coming in M2–M3: FAISS and an HNSW index written from scratch.
+TypeScript, React 19, Vite, Tailwind CSS · Node.js, Express 5, Prisma 6, multer, pdf-parse · PostgreSQL · Python, FastAPI, sentence-transformers (all-MiniLM-L6-v2), FAISS. Coming in M3: an HNSW index written from scratch.
