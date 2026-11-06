@@ -64,6 +64,30 @@ export type InspectReport = {
   chunks: InspectChunk[];
 };
 
+// POST /api/search
+export type SearchResult = {
+  chunkId: string;
+  chunkIndex: number;
+  documentId: string;
+  filename: string;
+  content: string;
+  score: number;
+};
+
+export type SearchResponse = {
+  processing: {
+    tokens: number;
+    maxTokens: number;
+    chunked: boolean;
+    parts: number;
+    dims: number;
+    embedding: number[];
+    indexed: number;
+    tookMs: number;
+  };
+  results: SearchResult[];
+};
+
 export function formatBytes(bytes: number) {
   if (bytes < 1024) return `${bytes} B`;
   if (bytes < 1024 * 1024) return `${Math.round(bytes / 1024)} KB`;
