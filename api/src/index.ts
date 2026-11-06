@@ -5,6 +5,7 @@ import dotenv from "dotenv";
 import healthRouter from "./routes/health";
 import uploadRouter from "./routes/upload";
 import documentsRouter from "./routes/documents";
+import searchRouter from "./routes/search";
 
 
 dotenv.config();
@@ -16,6 +17,7 @@ app.use(express.json());
 app.use("/api", healthRouter);
 app.use("/api", uploadRouter);
 app.use("/api", documentsRouter);
+app.use("/api", searchRouter);
 
 const PORT = process.env.PORT || 4000;
 app.listen(PORT, () => {

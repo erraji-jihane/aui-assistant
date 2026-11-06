@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import { prisma } from "../lib/prisma";
+import { refreshIndex } from "../lib/embed";
 import { inspectDocument } from "../services/inspectService";
 import { reprocessDocument } from "../services/documentService";
 
@@ -28,6 +29,7 @@ export async function deleteDocumentController(req: Request<{ id: string }>, res
     if (result.count === 0) {
         return res.status(404).json({ error: "Document not found" });
     }
+    await refreshIndex();
     return res.status(204).send();
 }
 

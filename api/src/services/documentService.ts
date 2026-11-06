@@ -1,6 +1,6 @@
 import { prisma } from "../lib/prisma";
 import { Prisma } from "@prisma/client";
-import { embedTexts } from "../lib/embed";
+import { embedTexts, refreshIndex } from "../lib/embed";
 
 // 120 words keeps almost every chunk under the model's 256-token limit, measured on real AUI PDFs
 // (course codes like "CSC 4352" cost ~1.5 tokens per word, so 200-word chunks were often cut off)
@@ -38,7 +38,7 @@ export async function createDocumentWithChunks(params: {
 }) {
   const chunks = await buildChunks(params.text);
 
-  return await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
+  const result = await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
     const doc = await tx.document.create({
       data: {
         filename: params.filename,
@@ -54,6 +54,9 @@ export async function createDocumentWithChunks(params: {
 
     return { document: doc, chunkCount: chunks.length };
   });
+
+  await refreshIndex();
+  return result;
 }
 
 // Re-chunk and re-embed a stored document with the current settings, replacing its old chunks
@@ -68,5 +71,6 @@ export async function reprocessDocument(id: string) {
     prisma.chunk.createMany({ data: chunks.map((chunk) => ({ ...chunk, documentId: id })) }),
   ]);
 
+  await refreshIndex();
   return { documentId: id, chunkCount: chunks.length };
 }
